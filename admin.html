@@ -1,0 +1,86 @@
+﻿<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TV Signage - Administração</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="admin-body">
+  <main class="admin-wrap">
+    <section class="admin-header">
+      <h1>Painel de Gestão da TV</h1>
+      <p>Gerir playlist, uploads e agendamentos.</p>
+      <div class="admin-header-actions">
+        <a href="./index.html" class="btn ghost">Abrir modo TV</a>
+        <button id="reloadBtn" class="btn ghost" type="button">Recarregar playlist</button>
+      </div>
+    </section>
+
+    <section class="admin-card">
+      <h2>Configuração do ecrã</h2>
+      <div class="grid-2">
+        <label>Orientação da TV
+          <select id="screenOrientation">
+            <option value="landscape">Horizontal</option>
+            <option value="portrait">Vertical</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="admin-card">
+      <h2>Novo item</h2>
+      <div class="grid-2">
+        <label>Tipo
+          <select id="newType">
+            <option value="video">Vídeo</option>
+            <option value="image">Flyer (imagem)</option>
+          </select>
+        </label>
+
+        <label>Duração (imagem, segundos)
+          <input id="newDuration" type="number" min="1" step="1" value="10" />
+        </label>
+
+        <label>Fonte manual (URL/caminho)
+          <input id="newSrc" type="text" placeholder="./assets/media/video1.mp4" />
+        </label>
+
+        <label>Upload ficheiro (opcional)
+          <input id="newFile" type="file" />
+        </label>
+
+        <label>Início (HH:MM, opcional)
+          <input id="newStart" type="time" />
+        </label>
+
+        <label>Fim (HH:MM, opcional)
+          <input id="newEnd" type="time" />
+        </label>
+
+        <label class="span-2">Dias ativos (0-6, opcional)
+          <input id="newDays" type="text" placeholder="1,2,3,4,5 (0=Domingo, 6=Sábado)" />
+        </label>
+      </div>
+
+      <div class="actions">
+        <button id="addBtn" class="btn" type="button">Adicionar à playlist</button>
+      </div>
+    </section>
+
+    <section class="admin-card">
+      <h2>Playlist</h2>
+      <div id="list" class="playlist-list"></div>
+
+      <div class="actions">
+        <button id="saveBtn" class="btn" type="button">Guardar playlist</button>
+      </div>
+    </section>
+
+    <p id="adminStatus" class="admin-status">A carregar...</p>
+  </main>
+
+  <script src="./admin.js"></script>
+</body>
+</html>
