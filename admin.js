@@ -4,6 +4,9 @@ const saveBtn = document.getElementById("saveBtn");
 const addBtn = document.getElementById("addBtn");
 const reloadBtn = document.getElementById("reloadBtn");
 const screenOrientationEl = document.getElementById("screenOrientation");
+const previewModalEl = document.getElementById("previewModal");
+const previewDialogEl = document.getElementById("previewDialog");
+const previewCloseEl = document.getElementById("previewClose");
 
 const API_PLAYLIST_URL = "./api/playlist";
 const FILE_PLAYLIST_URL = "./config/playlist.json";
@@ -89,6 +92,72 @@ function normalizeItem(item) {
   return normalized;
 }
 
+function closePreviewModal() {
+  previewModalEl.classList.add("hidden");
+  previewModalEl.setAttribute("aria-hidden", "true");
+  previewDialogEl.innerHTML = "";
+}
+
+function openPreviewModal(item) {
+  previewDialogEl.innerHTML = "";
+
+  const media = document.createElement(item.type === "image" ? "img" : "video");
+  media.src = item.src;
+  media.title = item.src;
+
+  if (item.type === "image") {
+    media.alt = "Pré-visualização ampliada do flyer";
+  } else {
+    media.controls = true;
+    media.autoplay = true;
+    media.muted = true;
+    media.playsInline = true;
+  }
+
+  previewDialogEl.appendChild(media);
+  previewModalEl.classList.remove("hidden");
+  previewModalEl.setAttribute("aria-hidden", "false");
+  previewCloseEl.focus();
+}
+
+function createPreview(item) {
+  const preview = document.createElement("div");
+  preview.className = "playlist-preview";
+  preview.tabIndex = 0;
+  preview.role = "button";
+  preview.ariaLabel = "Ampliar pré-visualização";
+
+  const media = document.createElement(item.type === "image" ? "img" : "video");
+  media.src = item.src;
+  media.title = item.src;
+
+  if (item.type === "image") {
+    media.alt = "Pré-visualização do flyer";
+    media.loading = "lazy";
+  } else {
+    media.controls = true;
+    media.muted = true;
+    media.preload = "metadata";
+    media.playsInline = true;
+  }
+
+  media.addEventListener("error", () => {
+    preview.classList.add("playlist-preview-error");
+    preview.textContent = "Pré-visualização indisponível";
+  });
+
+  preview.appendChild(media);
+  preview.addEventListener("click", () => openPreviewModal(item));
+  preview.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openPreviewModal(item);
+    }
+  });
+
+  return preview;
+}
+
 function createRow(item, index) {
   const row = document.createElement("div");
   row.className = "playlist-item";
@@ -99,18 +168,45 @@ function createRow(item, index) {
     ? ` | ${item.schedule.start || "--:--"}-${item.schedule.end || "--:--"} | dias: ${daysToText(item.schedule.days) || "todos"}`
     : "";
 
-  row.innerHTML = `
-    <div class="playlist-main">
-      <strong>${index + 1}. ${typeLabel}</strong>
-      <span>${item.src}${durationText}${scheduleText}</span>
-    </div>
-    <div class="playlist-actions">
-      <button type="button" data-action="up">↑</button>
-      <button type="button" data-action="down">↓</button>
-      <button type="button" data-action="edit">Editar</button>
-      <button type="button" data-action="delete">Remover</button>
-    </div>
-  `;
+  const content = document.createElement("div");
+  content.className = "playlist-content";
+
+  const main = document.createElement("div");
+  main.className = "playlist-main";
+
+  const title = document.createElement("strong");
+  title.textContent = `${index + 1}. ${typeLabel}`;
+
+  const details = document.createElement("span");
+  details.textContent = `${item.src}${durationText}${scheduleText}`;
+
+  const openLink = document.createElement("a");
+  openLink.className = "playlist-open";
+  openLink.href = item.src;
+  openLink.target = "_blank";
+  openLink.rel = "noopener";
+  openLink.textContent = "Abrir ficheiro";
+
+  main.append(title, details, openLink);
+  content.append(createPreview(item), main);
+
+  const actions = document.createElement("div");
+  actions.className = "playlist-actions";
+
+  [
+    ["up", "↑"],
+    ["down", "↓"],
+    ["edit", "Editar"],
+    ["delete", "Remover"]
+  ].forEach(([action, label]) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.action = action;
+    button.textContent = label;
+    actions.appendChild(button);
+  });
+
+  row.append(content, actions);
 
   row.querySelector('[data-action="up"]').addEventListener("click", () => moveItem(index, -1));
   row.querySelector('[data-action="down"]').addEventListener("click", () => moveItem(index, 1));
@@ -332,5 +428,14 @@ async function loadPlaylist() {
 saveBtn.addEventListener("click", savePlaylist);
 addBtn.addEventListener("click", addItem);
 reloadBtn.addEventListener("click", loadPlaylist);
+previewCloseEl.addEventListener("click", closePreviewModal);
+previewModalEl.addEventListener("click", (event) => {
+  if (event.target === previewModalEl) closePreviewModal();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !previewModalEl.classList.contains("hidden")) {
+    closePreviewModal();
+  }
+});
 
 loadPlaylist();

@@ -191,6 +191,48 @@ select {
   background: rgba(255, 255, 255, 0.02);
 }
 
+.playlist-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.playlist-preview {
+  width: 132px;
+  aspect-ratio: 16 / 9;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #050505;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  text-align: center;
+  cursor: zoom-in;
+}
+
+.playlist-preview img,
+.playlist-preview video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  background: #000;
+  pointer-events: none;
+}
+
+.playlist-preview:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.playlist-preview-error {
+  padding: 8px;
+}
+
 .playlist-main {
   display: grid;
   gap: 4px;
@@ -204,9 +246,21 @@ select {
   text-overflow: ellipsis;
 }
 
+.playlist-open {
+  width: fit-content;
+  color: var(--accent);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.playlist-open:hover {
+  text-decoration: underline;
+}
+
 .playlist-actions {
   display: flex;
   gap: 6px;
+  flex: 0 0 auto;
 }
 
 .playlist-actions button {
@@ -228,6 +282,53 @@ select {
   margin: 0;
 }
 
+.preview-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.88);
+}
+
+.preview-modal.hidden {
+  display: none;
+}
+
+.preview-dialog {
+  width: min(58vw, 820px);
+  height: min(62vh, 620px);
+  display: grid;
+  place-items: center;
+}
+
+.preview-dialog img,
+.preview-dialog video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.preview-close {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 21;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #121212;
+  color: var(--fg);
+  cursor: pointer;
+  font-size: 28px;
+  line-height: 1;
+}
+
 @media (max-width: 900px) {
   .grid-2 {
     grid-template-columns: 1fr;
@@ -242,7 +343,21 @@ select {
     align-items: stretch;
   }
 
+  .playlist-content {
+    align-items: flex-start;
+  }
+
   .playlist-actions {
     justify-content: flex-end;
+  }
+}
+
+@media (max-width: 520px) {
+  .playlist-content {
+    flex-direction: column;
+  }
+
+  .playlist-preview {
+    width: 100%;
   }
 }

@@ -14,25 +14,6 @@
       "duration": 10
     },
     {
-      "type": "image",
-      "src": "./assets/flyers/1080x1920GinkgoBiloba.jpg",
-      "duration": 10
-    },
-    {
-      "type": "image",
-      "src": "./assets/flyers/flyer2.png",
-      "duration": 10
-    },
-    {
-      "type": "image",
-      "src": "./assets/flyers/flyer1.jpg",
-      "duration": 8
-    },
-    {
-      "type": "video",
-      "src": "./assets/media/video1.mp4"
-    },
-    {
       "type": "video",
       "src": "./assets/media/50TopHits2026PlaylistTrendingMusic2026SpotifyMixBestTikTokSongsHitsCollection-YouTube-GoogleChrome2026-03-2508-09-50.mp4"
     }
