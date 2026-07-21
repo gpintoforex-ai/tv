@@ -11,12 +11,15 @@
     <video id="videoPlayer" class="media hidden" autoplay muted playsinline></video>
     <img id="imagePlayer" class="media hidden" alt="Publicidade" />
 
-    <div id="clock" class="clock hidden">
-      <div id="clockTime" class="clock-time"></div>
-      <div id="clockDate" class="clock-date"></div>
+    <div id="weatherWidget" class="weather-widget hidden">
+      <div class="weather-icon" id="weatherIcon" aria-hidden="true"></div>
+      <div class="weather-main">
+        <div class="weather-period" id="weatherPeriod"></div>
+        <div class="weather-temp" id="weatherTemp"></div>
+        <div class="weather-desc" id="weatherDesc"></div>
+        <div class="weather-time" id="weatherTime"></div>
+      </div>
     </div>
-
-    <div id="status" class="status">A carregar playlist...</div>
   </main>
 
   <script src="./app.js"></script>

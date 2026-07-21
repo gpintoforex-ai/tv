@@ -1,21 +1,72 @@
 ﻿const appEl = document.getElementById("app");
 const videoEl = document.getElementById("videoPlayer");
 const imageEl = document.getElementById("imagePlayer");
-const statusEl = document.getElementById("status");
-const clockEl = document.getElementById("clock");
-const clockTimeEl = document.getElementById("clockTime");
-const clockDateEl = document.getElementById("clockDate");
+const weatherWidgetEl = document.getElementById("weatherWidget");
+const weatherIconEl = document.getElementById("weatherIcon");
+const weatherPeriodEl = document.getElementById("weatherPeriod");
+const weatherTempEl = document.getElementById("weatherTemp");
+const weatherDescEl = document.getElementById("weatherDesc");
+const weatherTimeEl = document.getElementById("weatherTime");
 
 const DEFAULT_IMAGE_DURATION_SECONDS = 10;
 const API_PLAYLIST_URL = "./api/playlist";
 const FILE_PLAYLIST_URL = "./config/playlist.json";
+const WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast";
+const WEATHER_REFRESH_MS = 10 * 60 * 1000;
+const CLOCK_REFRESH_MS = 30 * 1000;
+const DEFAULT_COORDS = { latitude: 38.7167, longitude: -9.1333 };
+const WEATHER_POSITIONS = ["top-right", "top-left", "bottom-right", "bottom-left"];
+
+const WEATHER_CODES = {
+  0: { desc: "Céu limpo", icon: "clear" },
+  1: { desc: "Praticamente limpo", icon: "clear" },
+  2: { desc: "Parcialmente nublado", icon: "cloudy" },
+  3: { desc: "Nublado", icon: "cloudy" },
+  45: { desc: "Nevoeiro", icon: "fog" },
+  48: { desc: "Nevoeiro gelado", icon: "fog" },
+  51: { desc: "Chuvisco fraco", icon: "rain" },
+  53: { desc: "Chuvisco", icon: "rain" },
+  55: { desc: "Chuvisco forte", icon: "rain" },
+  56: { desc: "Chuvisco gelado", icon: "rain" },
+  57: { desc: "Chuvisco gelado forte", icon: "rain" },
+  61: { desc: "Chuva fraca", icon: "rain" },
+  63: { desc: "Chuva", icon: "rain" },
+  65: { desc: "Chuva forte", icon: "rain" },
+  66: { desc: "Chuva gelada", icon: "rain" },
+  67: { desc: "Chuva gelada forte", icon: "rain" },
+  71: { desc: "Neve fraca", icon: "snow" },
+  73: { desc: "Neve", icon: "snow" },
+  75: { desc: "Neve forte", icon: "snow" },
+  77: { desc: "Granizo fino", icon: "snow" },
+  80: { desc: "Aguaceiros fracos", icon: "rain" },
+  81: { desc: "Aguaceiros", icon: "rain" },
+  82: { desc: "Aguaceiros fortes", icon: "rain" },
+  85: { desc: "Aguaceiros de neve", icon: "snow" },
+  86: { desc: "Aguaceiros de neve fortes", icon: "snow" },
+  95: { desc: "Trovoada", icon: "storm" },
+  96: { desc: "Trovoada com granizo", icon: "storm" },
+  99: { desc: "Trovoada com granizo forte", icon: "storm" }
+};
+
+const WEATHER_ICONS = {
+  clear: (isDay) => isDay
+    ? '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="14" fill="#ffd25a"/><g stroke="#ffd25a" stroke-width="4" stroke-linecap="round"><line x1="32" y1="4" x2="32" y2="12"/><line x1="32" y1="52" x2="32" y2="60"/><line x1="4" y1="32" x2="12" y2="32"/><line x1="52" y1="32" x2="60" y2="32"/><line x1="12" y1="12" x2="17.5" y2="17.5"/><line x1="46.5" y1="46.5" x2="52" y2="52"/><line x1="12" y1="52" x2="17.5" y2="46.5"/><line x1="46.5" y1="17.5" x2="52" y2="12"/></g></svg>'
+    : '<svg viewBox="0 0 64 64"><path d="M42 8a20 20 0 1 0 14 34 16 16 0 0 1-14-34z" fill="#e8ecf7"/></svg>',
+  cloudy: () => '<svg viewBox="0 0 64 64"><circle cx="24" cy="28" r="12" fill="#ffd25a"/><path d="M20 44a12 12 0 0 1 0-24 14 14 0 0 1 27 4 10 10 0 0 1-3 20H20z" fill="#f4f7ff"/></svg>',
+  fog: () => '<svg viewBox="0 0 64 64"><g stroke="#e8ecf7" stroke-width="4" stroke-linecap="round"><line x1="8" y1="24" x2="56" y2="24"/><line x1="8" y1="34" x2="56" y2="34"/><line x1="8" y1="44" x2="56" y2="44"/></g></svg>',
+  rain: () => '<svg viewBox="0 0 64 64"><path d="M18 34a12 12 0 0 1 0-24 14 14 0 0 1 27 4 10 10 0 0 1-3 20H18z" fill="#f4f7ff"/><g stroke="#bcd4ff" stroke-width="4" stroke-linecap="round"><line x1="22" y1="46" x2="18" y2="56"/><line x1="34" y1="46" x2="30" y2="56"/><line x1="46" y1="46" x2="42" y2="56"/></g></svg>',
+  snow: () => '<svg viewBox="0 0 64 64"><path d="M18 32a12 12 0 0 1 0-24 14 14 0 0 1 27 4 10 10 0 0 1-3 20H18z" fill="#f4f7ff"/><g fill="#dce8ff"><circle cx="20" cy="50" r="3"/><circle cx="32" cy="54" r="3"/><circle cx="44" cy="50" r="3"/></g></svg>',
+  storm: () => '<svg viewBox="0 0 64 64"><path d="M18 30a12 12 0 0 1 0-24 14 14 0 0 1 27 4 10 10 0 0 1-3 20H18z" fill="#e8ecf7"/><path d="M30 40l-8 14h8l-4 10 14-16h-8l6-8z" fill="#ffd25a"/></svg>'
+};
 
 let playlist = [];
 let currentIndex = 0;
 let imageTimerId = null;
-let clockTimerId = null;
+let weatherClockTimerId = null;
+let weatherFetchTimerId = null;
 let paused = false;
 let portraitMode = false;
+let lastWeatherData = null;
 
 const orientationParam = new URLSearchParams(window.location.search).get("orientation");
 const forceOrientationFromUrl = orientationParam === "portrait" || orientationParam === "landscape";
@@ -25,9 +76,11 @@ if (forceOrientationFromUrl) {
 }
 
 function setStatus(message, type = "") {
-  statusEl.textContent = message;
-  statusEl.classList.remove("ok", "error");
-  if (type) statusEl.classList.add(type);
+  if (type === "error") {
+    console.error(message);
+  } else {
+    console.log(message);
+  }
 }
 
 function applyOrientation() {
@@ -40,42 +93,107 @@ function applyOrientationFromSettings(settings) {
   applyOrientation();
 }
 
-function formatClockDate(now) {
-  const text = now.toLocaleDateString("pt-PT", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric"
-  });
-  return text;
+function getDayPeriod(hour) {
+  if (hour >= 5 && hour < 12) return "Manhã";
+  if (hour >= 12 && hour < 20) return "Tarde";
+  return "Noite";
 }
 
-function updateClock() {
+function updateWeatherClock() {
   const now = new Date();
-  clockTimeEl.textContent = now.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
-  clockDateEl.textContent = formatClockDate(now);
+  weatherPeriodEl.textContent = getDayPeriod(now.getHours());
+  weatherTimeEl.textContent = now.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
 }
 
-function stopClock() {
-  if (clockTimerId) {
-    clearInterval(clockTimerId);
-    clockTimerId = null;
+function renderWeather(data) {
+  const info = WEATHER_CODES[data.weatherCode] || { desc: "Condição desconhecida", icon: "cloudy" };
+  const iconFn = WEATHER_ICONS[info.icon] || WEATHER_ICONS.cloudy;
+  weatherIconEl.innerHTML = iconFn(data.isDay);
+  weatherTempEl.textContent = `${Math.round(data.temperature)}°C`;
+  weatherDescEl.textContent = info.desc;
+}
+
+async function fetchWeather(coords) {
+  const params = new URLSearchParams({
+    latitude: coords.latitude,
+    longitude: coords.longitude,
+    current: "temperature_2m,weather_code,is_day",
+    timezone: "auto"
+  });
+
+  const response = await fetch(`${WEATHER_API_URL}?${params.toString()}`, { cache: "no-store" });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const data = await response.json();
+  const current = data.current;
+  if (!current) throw new Error("Resposta de meteorologia inválida");
+
+  return {
+    temperature: current.temperature_2m,
+    weatherCode: current.weather_code,
+    isDay: current.is_day === 1
+  };
+}
+
+function getCoords() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve(DEFAULT_COORDS);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude }),
+      () => resolve(DEFAULT_COORDS),
+      { timeout: 8000 }
+    );
+  });
+}
+
+async function refreshWeather() {
+  try {
+    const coords = await getCoords();
+    lastWeatherData = await fetchWeather(coords);
+    renderWeather(lastWeatherData);
+  } catch (_) {
+    if (lastWeatherData) renderWeather(lastWeatherData);
   }
-  clockEl.classList.add("hidden");
 }
 
-function startClock() {
-  if (clockTimerId) return;
-  updateClock();
-  clockTimerId = setInterval(updateClock, 1000);
-  clockEl.classList.remove("hidden");
+function stopWeatherWidget() {
+  if (weatherClockTimerId) {
+    clearInterval(weatherClockTimerId);
+    weatherClockTimerId = null;
+  }
+  if (weatherFetchTimerId) {
+    clearInterval(weatherFetchTimerId);
+    weatherFetchTimerId = null;
+  }
+  weatherWidgetEl.classList.add("hidden");
+}
+
+function startWeatherWidget() {
+  weatherWidgetEl.classList.remove("hidden");
+  updateWeatherClock();
+  if (!weatherClockTimerId) {
+    weatherClockTimerId = setInterval(updateWeatherClock, CLOCK_REFRESH_MS);
+  }
+  if (!weatherFetchTimerId) {
+    refreshWeather();
+    weatherFetchTimerId = setInterval(refreshWeather, WEATHER_REFRESH_MS);
+  }
+}
+
+function applyWeatherPosition(position) {
+  const normalized = WEATHER_POSITIONS.includes(position) ? position : "top-right";
+  WEATHER_POSITIONS.forEach((pos) => weatherWidgetEl.classList.remove(`pos-${pos}`));
+  weatherWidgetEl.classList.add(`pos-${normalized}`);
 }
 
 function applyClockFromSettings(settings) {
+  applyWeatherPosition(settings?.weatherPosition);
   if (settings?.showClock) {
-    startClock();
+    startWeatherWidget();
   } else {
-    stopClock();
+    stopWeatherWidget();
   }
 }
 

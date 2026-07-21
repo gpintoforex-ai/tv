@@ -5,6 +5,7 @@ const addBtn = document.getElementById("addBtn");
 const reloadBtn = document.getElementById("reloadBtn");
 const screenOrientationEl = document.getElementById("screenOrientation");
 const showClockEl = document.getElementById("showClock");
+const weatherPositionEl = document.getElementById("weatherPosition");
 const previewModalEl = document.getElementById("previewModal");
 const previewDialogEl = document.getElementById("previewDialog");
 const previewCloseEl = document.getElementById("previewClose");
@@ -13,11 +14,18 @@ const API_PLAYLIST_URL = "./api/playlist";
 const FILE_PLAYLIST_URL = "./config/playlist.json";
 const API_UPLOAD_URL = "./api/upload";
 
+const WEATHER_POSITIONS = ["top-right", "top-left", "bottom-right", "bottom-left"];
+
 let playlist = [];
 let appSettings = {
   orientation: "landscape",
-  showClock: false
+  showClock: false,
+  weatherPosition: "top-right"
 };
+
+function normalizeWeatherPosition(value) {
+  return WEATHER_POSITIONS.includes(value) ? value : "top-right";
+}
 
 const newTypeEl = document.getElementById("newType");
 const newDurationEl = document.getElementById("newDuration");
@@ -40,11 +48,13 @@ function normalizeOrientation(value) {
 function applySettingsToForm() {
   screenOrientationEl.value = normalizeOrientation(appSettings.orientation);
   showClockEl.value = appSettings.showClock ? "true" : "false";
+  weatherPositionEl.value = normalizeWeatherPosition(appSettings.weatherPosition);
 }
 
 function readSettingsFromForm() {
   appSettings.orientation = normalizeOrientation(screenOrientationEl.value);
   appSettings.showClock = showClockEl.value === "true";
+  appSettings.weatherPosition = normalizeWeatherPosition(weatherPositionEl.value);
 }
 
 function parseDays(value) {
@@ -379,7 +389,8 @@ async function savePlaylist() {
       body: JSON.stringify({
         settings: {
           orientation: normalizeOrientation(appSettings.orientation),
-          showClock: Boolean(appSettings.showClock)
+          showClock: Boolean(appSettings.showClock),
+          weatherPosition: normalizeWeatherPosition(appSettings.weatherPosition)
         },
         items: playlist
       })
@@ -400,6 +411,7 @@ function hydrateFromPayload(data) {
   playlist = Array.isArray(data.items) ? data.items.map(normalizeItem) : [];
   appSettings.orientation = normalizeOrientation(data?.settings?.orientation);
   appSettings.showClock = Boolean(data?.settings?.showClock);
+  appSettings.weatherPosition = normalizeWeatherPosition(data?.settings?.weatherPosition);
   applySettingsToForm();
   renderList();
 }
@@ -426,6 +438,7 @@ async function loadPlaylist() {
     playlist = [];
     appSettings.orientation = "landscape";
     appSettings.showClock = false;
+    appSettings.weatherPosition = "top-right";
     applySettingsToForm();
     renderList();
     setStatus(`Erro ao carregar playlist: ${error.message}`, "error");

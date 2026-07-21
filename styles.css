@@ -60,52 +60,89 @@ body {
   display: none;
 }
 
-.status {
+.weather-widget {
   position: absolute;
-  left: 16px;
-  bottom: 16px;
-  padding: 8px 12px;
-  font-size: 14px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(2px);
-}
-
-.clock {
-  position: absolute;
-  top: 16px;
-  right: 16px;
   z-index: 5;
-  padding: 10px 16px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(2px);
-  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #4a9de8 0%, #2f6fce 100%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  color: #fff;
   pointer-events: none;
 }
 
-.clock-time {
-  font-size: 28px;
-  font-weight: 600;
-  line-height: 1.1;
+.weather-widget.pos-top-right {
+  top: 16px;
+  right: 16px;
+}
+
+.weather-widget.pos-top-left {
+  top: 16px;
+  left: 16px;
+}
+
+.weather-widget.pos-bottom-right {
+  bottom: 16px;
+  right: 16px;
+}
+
+.weather-widget.pos-bottom-left {
+  bottom: 16px;
+  left: 16px;
+}
+
+.weather-icon {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+}
+
+.weather-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.weather-main {
+  text-align: left;
+}
+
+.weather-period {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.weather-temp {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }
 
-.clock-date {
+.weather-desc {
   font-size: 13px;
-  opacity: 0.8;
+  opacity: 0.9;
   text-transform: capitalize;
-  margin-top: 2px;
 }
 
-.status.ok,
+.weather-time {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
 .admin-status.ok {
   color: var(--accent);
 }
 
-.status.error,
 .admin-status.error {
   color: #ff6767;
 }

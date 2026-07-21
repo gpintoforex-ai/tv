@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TV Signage - Administração</title>
-  <link rel="stylesheet" href="./styles.css?v=preview-7" />
+  <link rel="stylesheet" href="./styles.css?v=preview-9" />
 </head>
 <body class="admin-body">
   <main class="admin-wrap">
@@ -27,10 +27,19 @@
           </select>
         </label>
 
-        <label>Relógio no ecrã
+        <label>Hora e meteorologia no ecrã
           <select id="showClock">
             <option value="false">Desativado</option>
-            <option value="true">Ativado (hora e data)</option>
+            <option value="true">Ativado (hora e tempo no local)</option>
+          </select>
+        </label>
+
+        <label>Posição da hora/meteorologia
+          <select id="weatherPosition">
+            <option value="top-right">Topo direita</option>
+            <option value="top-left">Topo esquerda</option>
+            <option value="bottom-right">Fundo direita</option>
+            <option value="bottom-left">Fundo esquerda</option>
           </select>
         </label>
       </div>
@@ -93,6 +102,6 @@
     <div id="previewDialog" class="preview-dialog" role="dialog" aria-modal="true" aria-label="Pré-visualização ampliada"></div>
   </div>
 
-  <script src="./admin.js?v=preview-7"></script>
+  <script src="./admin.js?v=preview-9"></script>
 </body>
 </html>
