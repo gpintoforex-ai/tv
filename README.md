@@ -27,7 +27,7 @@ Abre:
 
 ## Fluxo recomendado
 
-1. No painel admin, define a orientação do ecrã (Horizontal/Vertical).
+1. No painel admin, define a orientação do ecrã (Horizontal/Vertical) e, se quiseres, ativa o relógio no ecrã (hora e data, canto superior direito).
 2. Adiciona itens por `src` manual ou por upload de ficheiro.
 3. Define (opcionalmente) duração de imagens e horário/dias ativos.
 4. Ordena os itens com `↑` e `↓`.

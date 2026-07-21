@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { getStore } = require("@netlify/blobs");
+const { connectLambda, getStore } = require("@netlify/blobs");
 
 const STORE_NAME = "tv-config";
 const KEY = "playlist.json";
@@ -29,6 +29,7 @@ function jsonResponse(statusCode, payload) {
 }
 
 exports.handler = async (event) => {
+  connectLambda(event);
   const store = getStore(STORE_NAME);
 
   if (event.httpMethod === "GET") {

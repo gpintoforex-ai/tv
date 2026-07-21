@@ -72,6 +72,34 @@ body {
   backdrop-filter: blur(2px);
 }
 
+.clock {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 5;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(2px);
+  text-align: right;
+  pointer-events: none;
+}
+
+.clock-time {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-date {
+  font-size: 13px;
+  opacity: 0.8;
+  text-transform: capitalize;
+  margin-top: 2px;
+}
+
 .status.ok,
 .admin-status.ok {
   color: var(--accent);

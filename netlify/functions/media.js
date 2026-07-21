@@ -1,4 +1,4 @@
-const { getStore } = require("@netlify/blobs");
+const { connectLambda, getStore } = require("@netlify/blobs");
 
 const MIME_TYPES = {
   ".jpg": "image/jpeg",
@@ -18,6 +18,8 @@ function guessMime(filename) {
 }
 
 exports.handler = async (event) => {
+  connectLambda(event);
+
   if (event.httpMethod !== "GET") {
     return { statusCode: 405, body: "Método não suportado" };
   }

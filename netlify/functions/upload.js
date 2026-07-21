@@ -1,4 +1,4 @@
-const { getStore } = require("@netlify/blobs");
+const { connectLambda, getStore } = require("@netlify/blobs");
 
 const MAX_BYTES = 20 * 1024 * 1024;
 
@@ -19,6 +19,8 @@ function sanitizeFilename(name) {
 }
 
 exports.handler = async (event) => {
+  connectLambda(event);
+
   if (event.httpMethod !== "POST") {
     return jsonResponse(405, { error: "Método não suportado" });
   }

@@ -4,6 +4,7 @@ const saveBtn = document.getElementById("saveBtn");
 const addBtn = document.getElementById("addBtn");
 const reloadBtn = document.getElementById("reloadBtn");
 const screenOrientationEl = document.getElementById("screenOrientation");
+const showClockEl = document.getElementById("showClock");
 const previewModalEl = document.getElementById("previewModal");
 const previewDialogEl = document.getElementById("previewDialog");
 const previewCloseEl = document.getElementById("previewClose");
@@ -14,7 +15,8 @@ const API_UPLOAD_URL = "./api/upload";
 
 let playlist = [];
 let appSettings = {
-  orientation: "landscape"
+  orientation: "landscape",
+  showClock: false
 };
 
 const newTypeEl = document.getElementById("newType");
@@ -37,10 +39,12 @@ function normalizeOrientation(value) {
 
 function applySettingsToForm() {
   screenOrientationEl.value = normalizeOrientation(appSettings.orientation);
+  showClockEl.value = appSettings.showClock ? "true" : "false";
 }
 
 function readSettingsFromForm() {
   appSettings.orientation = normalizeOrientation(screenOrientationEl.value);
+  appSettings.showClock = showClockEl.value === "true";
 }
 
 function parseDays(value) {
@@ -374,7 +378,8 @@ async function savePlaylist() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         settings: {
-          orientation: normalizeOrientation(appSettings.orientation)
+          orientation: normalizeOrientation(appSettings.orientation),
+          showClock: Boolean(appSettings.showClock)
         },
         items: playlist
       })
@@ -394,6 +399,7 @@ async function savePlaylist() {
 function hydrateFromPayload(data) {
   playlist = Array.isArray(data.items) ? data.items.map(normalizeItem) : [];
   appSettings.orientation = normalizeOrientation(data?.settings?.orientation);
+  appSettings.showClock = Boolean(data?.settings?.showClock);
   applySettingsToForm();
   renderList();
 }
@@ -419,6 +425,7 @@ async function loadPlaylist() {
   } catch (error) {
     playlist = [];
     appSettings.orientation = "landscape";
+    appSettings.showClock = false;
     applySettingsToForm();
     renderList();
     setStatus(`Erro ao carregar playlist: ${error.message}`, "error");

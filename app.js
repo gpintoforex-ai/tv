@@ -2,6 +2,9 @@
 const videoEl = document.getElementById("videoPlayer");
 const imageEl = document.getElementById("imagePlayer");
 const statusEl = document.getElementById("status");
+const clockEl = document.getElementById("clock");
+const clockTimeEl = document.getElementById("clockTime");
+const clockDateEl = document.getElementById("clockDate");
 
 const DEFAULT_IMAGE_DURATION_SECONDS = 10;
 const API_PLAYLIST_URL = "./api/playlist";
@@ -10,6 +13,7 @@ const FILE_PLAYLIST_URL = "./config/playlist.json";
 let playlist = [];
 let currentIndex = 0;
 let imageTimerId = null;
+let clockTimerId = null;
 let paused = false;
 let portraitMode = false;
 
@@ -34,6 +38,45 @@ function applyOrientationFromSettings(settings) {
   if (forceOrientationFromUrl) return;
   portraitMode = settings?.orientation === "portrait";
   applyOrientation();
+}
+
+function formatClockDate(now) {
+  const text = now.toLocaleDateString("pt-PT", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+  return text;
+}
+
+function updateClock() {
+  const now = new Date();
+  clockTimeEl.textContent = now.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
+  clockDateEl.textContent = formatClockDate(now);
+}
+
+function stopClock() {
+  if (clockTimerId) {
+    clearInterval(clockTimerId);
+    clockTimerId = null;
+  }
+  clockEl.classList.add("hidden");
+}
+
+function startClock() {
+  if (clockTimerId) return;
+  updateClock();
+  clockTimerId = setInterval(updateClock, 1000);
+  clockEl.classList.remove("hidden");
+}
+
+function applyClockFromSettings(settings) {
+  if (settings?.showClock) {
+    startClock();
+  } else {
+    stopClock();
+  }
 }
 
 function toggleOrientation() {
@@ -196,6 +239,7 @@ async function loadPlaylist() {
     const data = await fetchPlaylistPayload(API_PLAYLIST_URL);
     playlist = data.items;
     applyOrientationFromSettings(data.settings);
+    applyClockFromSettings(data.settings);
     currentIndex = 0;
     playCurrentItem();
     return;
@@ -207,6 +251,7 @@ async function loadPlaylist() {
     const data = await fetchPlaylistPayload(FILE_PLAYLIST_URL);
     playlist = data.items;
     applyOrientationFromSettings(data.settings);
+    applyClockFromSettings(data.settings);
     currentIndex = 0;
     playCurrentItem();
   } catch (error) {
