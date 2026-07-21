@@ -68,8 +68,10 @@ body {
   gap: 12px;
   padding: 14px 20px;
   border-radius: 18px;
-  background: linear-gradient(160deg, #4a9de8 0%, #2f6fce 100%);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(160deg, rgba(74, 157, 232, 0.55) 0%, rgba(47, 111, 206, 0.55) 100%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   color: #fff;
   pointer-events: none;
 }
