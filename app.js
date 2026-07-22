@@ -14,6 +14,7 @@ const FILE_PLAYLIST_URL = "./config/playlist.json";
 const WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast";
 const WEATHER_REFRESH_MS = 10 * 60 * 1000;
 const CLOCK_REFRESH_MS = 30 * 1000;
+const PLAYLIST_POLL_MS = 60 * 1000;
 const DEFAULT_COORDS = { latitude: 38.7167, longitude: -9.1333 };
 const WEATHER_POSITIONS = ["top-right", "top-left", "bottom-right", "bottom-left"];
 
@@ -64,9 +65,11 @@ let currentIndex = 0;
 let imageTimerId = null;
 let weatherClockTimerId = null;
 let weatherFetchTimerId = null;
+let playlistPollTimerId = null;
 let paused = false;
 let portraitMode = false;
 let lastWeatherData = null;
+let lastPlaylistSignature = null;
 
 const orientationParam = new URLSearchParams(window.location.search).get("orientation");
 const forceOrientationFromUrl = orientationParam === "portrait" || orientationParam === "landscape";
@@ -352,29 +355,43 @@ async function fetchPlaylistPayload(url) {
   return data;
 }
 
-async function loadPlaylist() {
-  try {
-    const data = await fetchPlaylistPayload(API_PLAYLIST_URL);
-    playlist = data.items;
-    applyOrientationFromSettings(data.settings);
-    applyClockFromSettings(data.settings);
+function applyPlaylistData(data, { resetIndex }) {
+  playlist = data.items;
+  applyOrientationFromSettings(data.settings);
+  applyClockFromSettings(data.settings);
+  lastPlaylistSignature = JSON.stringify(data);
+
+  if (resetIndex || currentIndex >= playlist.length) {
     currentIndex = 0;
     playCurrentItem();
+  }
+}
+
+async function loadPlaylist({ silent = false } = {}) {
+  try {
+    const data = await fetchPlaylistPayload(API_PLAYLIST_URL);
+    const signature = JSON.stringify(data);
+    if (silent && signature === lastPlaylistSignature) return;
+    applyPlaylistData(data, { resetIndex: !silent });
+    if (!silent) setStatus("Playlist carregada da API.", "ok");
     return;
   } catch (_) {
+    if (silent) return;
     // fallback para ficheiro estático
   }
 
   try {
     const data = await fetchPlaylistPayload(FILE_PLAYLIST_URL);
-    playlist = data.items;
-    applyOrientationFromSettings(data.settings);
-    applyClockFromSettings(data.settings);
-    currentIndex = 0;
-    playCurrentItem();
+    applyPlaylistData(data, { resetIndex: true });
+    setStatus("Playlist carregada de ficheiro estático.", "ok");
   } catch (error) {
     setStatus(`Erro ao carregar playlist: ${error.message}`, "error");
   }
+}
+
+function startPlaylistPolling() {
+  if (playlistPollTimerId) return;
+  playlistPollTimerId = setInterval(() => loadPlaylist({ silent: true }), PLAYLIST_POLL_MS);
 }
 
 videoEl.addEventListener("ended", () => {
@@ -434,3 +451,4 @@ document.addEventListener("keydown", (event) => {
 
 applyOrientation();
 loadPlaylist();
+startPlaylistPolling();
